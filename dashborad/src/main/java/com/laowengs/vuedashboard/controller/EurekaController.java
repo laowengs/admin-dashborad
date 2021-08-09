@@ -8,30 +8,25 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
-@RequestMapping("/eurekaCentre")
+@RequestMapping("/eurekaCenter")
 public class EurekaController {
 
     @Autowired
     private DiscoveryClient discoveryClient;
 
-    /**
-     * 获取注册在Eureka中的服务名称
-     * @return
-     */
-    @GetMapping("/getEurekaServices")
-    public List<String> getEurekaServices(){
-        List<String> services = new ArrayList<String>();
+    @GetMapping("/services")
+    public Map<String,List<ServiceInstance>> serviceInfo(){
+        Map<String,List<ServiceInstance>> listServiceInstanceGroupByServiceId = new HashMap<>();
         List<String> serviceNames = discoveryClient.getServices();
         for(String serviceName : serviceNames){
-            List<ServiceInstance> serviceInstances = discoveryClient.getInstances(serviceName);
-            for(ServiceInstance serviceInstance : serviceInstances){
-                services.add(String.format("%s:%s",serviceName,serviceInstance.getUri()));
-            }
+            listServiceInstanceGroupByServiceId.put(serviceName,discoveryClient.getInstances(serviceName));
         }
-        return services;
+        return listServiceInstanceGroupByServiceId;
     }
 
 }
